@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" rel="stylesheet">
+    <script crossorigin="anonymous"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Adult Content Detector</title>
+    <style>
+        .body {
+            background: black;
+            display: flex;
+            justify-content: center;
+            margin: 10rem 10rem 5rem 5rem;
+        }
+
+        .height-box {
+            min-height: 30rem;
+        }
+
+        .hover:hover {
+            filter: contrast(400%);
+        }
+    </style>
+</head>
+<body class="body m-5 d-flex flex-column">
+<div class="d-flex text-white mh-100 w-100 justify-content-between">
+    <div class="container d-flex flex-column flex-grow-1">
+        <span>Input Video</span>
+        <div class="container d-flex flex-column justify-content-start align-items-center height-box rounded mt-3 bg-dark p-5">
+            <div class="bg-warning container rounded-3 p-3 mb-5 d-flex flex-column">
+                <span>Test with: https://www.youtube.com/watch?v=eAR2V7PZiIQ</span>
+                <span>Test with: https://www.youtube.com/watch?v=pZs4SYfU6pA</span>
+                <span>Test with: https://www.youtube.com/watch?v=bXlQ3Mw4uGc(Short safe video)</span>
+            </div>
+            <div class="d-flex flex-column">
+                <div class="d-flex gap-2">
+                    <label for="video">Upload a video:</label>
+                    <input class="w-100" id="video" type="file">
+                </div>
+                <span class="my-2 w-100 text-center text-danger">or</span>
+                <div class="d-flex gap-2">
+                    <label for="link">Enter a youtube url:</label>
+                    <input class="w-100 h-100" id="link" type="text">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="container flex-grow-1 d-flex flex-column">
+        <span>Output Video</span>
+        <div class="container d-flex justify-content-center align-items-center height-box rounded mt-3 bg-dark p-5">
+            <video class="mw-100 bg-gradient p-xl-5 rounded-3" controls id="output" src=""></video>
+        </div>
+    </div>
+</div>
+<div class="d-flex mx-2 my-3 justify-content-end">
+    <button class="btn bg-primary text-white px-5 py-2 hover" id="submit">
+        Start
+    </button>
+</div>
+<script>
+    url = 'http://localhost:8080/'
+    video = document.getElementById('video');
+    output = document.getElementById('output');
+    link = document.getElementById('link');
+    submit_btn = document.getElementById('submit');
+    submit_btn.onclick = async () => {
+        console.log("pressed")
+        if (video.files[0]) {
+            const file = video.files[0]
+            console.log(file)
+            const data = new FormData()
+            data.append("video", file)
+            await fetch(url + 'from-video', {
+                    method: 'POST',
+                    body: data
+                }
+            ).then(res => res.text()).then(obj => {
+                console.log(obj);
+                output.src = obj;
+                output.play();
+            });
+        } else if (link.value.length > 0) {
+            console.log(link.innerText);
+            const data = {
+                url: link.value
+            }
+            await fetch(url + 'from-yt', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }).then(res => res.text())
+                .then(obj => {
+                    console.log(obj);
+                    output.src = obj;
+                    output.play();
+                });
+        } else console.log("No file uploaded and no link found.")
+    }
+</script>
+</body>
+</html>
